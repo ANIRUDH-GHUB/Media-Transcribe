@@ -18,11 +18,12 @@ export const transcribe = async (media) => {
       fs.createReadStream(media), // file
       "whisper-1", // model
       "", // prompt
-      "srt", // response_format
+      "vtt", // response_format
       0.1, // temperature
       "en" // language
     );
-    return parseSrtFile(res.data);
+    return res.data;
+    // return parseSrtFile(res.data);
   } catch (error) {
     throw error;
   }
@@ -67,7 +68,7 @@ export const purifyJSON = (data) => {
   return res;
 };
 
-export const translate = async (data) => {
+export const translate = async (data, lang) => {
   let text = "";
   data.forEach((item, index) => {
     text += ` ${index + 1}. ${item.text}`;
@@ -78,8 +79,7 @@ export const translate = async (data) => {
       messages: [
         {
           role: "system",
-          content:
-            "You will be provided with a sentence in English, and your task is to translate it into French.",
+          content: `You will be provided with a sentence in English, and your task is to translate it into ${lang}.`,
         },
         {
           role: "user",
@@ -119,4 +119,4 @@ export const summarise = async (data) => {
   } catch (error) {
     throw error;
   }
-}
+};

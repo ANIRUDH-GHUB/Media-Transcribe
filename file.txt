@@ -1,0 +1,8 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:07.000
+Welcome to Solid Tax, Inc. We're the best rated tax preparation and accounting service in Ottawa.
+
+00:00:07.000 --> 00:00:11.000
+Book your appointment at SolidTax.ca now.
+
