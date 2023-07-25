@@ -18,12 +18,12 @@ export const transcribe = async (media) => {
       fs.createReadStream(media), // file
       "whisper-1", // model
       "", // prompt
-      "vtt", // response_format
+      "srt", // response_format
       0.1, // temperature
       "en" // language
     );
-    return res.data;
-    // return parseSrtFile(res.data);
+    // return res.data;
+    return parseSrtFile(res.data);
   } catch (error) {
     throw error;
   }
@@ -48,6 +48,21 @@ function parseSrtFile(data) {
   return timestamps;
 }
 
+export const attachTranslation = (data, text) => {
+  const lines = text.trim().split(/\r?\n/);
+  const res = [];
+  lines.forEach((line, index) => {
+    let timeData = {
+      start_time: data[index]?.start_time,
+      end_time: data[index]?.end_time,
+      text: line.slice(2),
+    };
+    res.push(timeData);
+  });
+  // writeFile('japanses.json', JSON.stringify(res), ()=>{console.log('Done')});
+  return res;
+};
+
 export const purifyJSON = (data) => {
   const res = [];
   let temp = [];
@@ -69,17 +84,14 @@ export const purifyJSON = (data) => {
 };
 
 export const translate = async (data, lang) => {
-  let text = "";
-  data.forEach((item, index) => {
-    text += ` ${index + 1}. ${item.text}`;
-  });
+  let text = data;
   try {
     const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: `You will be provided with a sentence in English, and your task is to translate it into ${lang}.`,
+          content: `You are given a text. Translate it into ${lang} accurately`
         },
         {
           role: "user",
@@ -87,8 +99,8 @@ export const translate = async (data, lang) => {
         },
       ],
     });
-    console.log("res", response.data?.choices?.[0]?.message?.content);
-    return response.data?.choices?.[0]?.message?.content;
+    console.log("res", data, response.data?.choices?.[0]?.message?.content);
+    return data, response.data?.choices?.[0]?.message?.content;
   } catch (error) {
     throw error;
   }
@@ -106,7 +118,7 @@ export const summarise = async (data) => {
         {
           role: "system",
           content:
-            "You will be provided with a json text, you need to summarise into chapter and indexing",
+            "I want you to act as a text summarizer to chapterise it. Each sentence is point based, try to add all add the points at the beginning ofeDont add your own interpretations.",
         },
         {
           role: "user",
